@@ -162,6 +162,11 @@ public final class BatchEventProcessor<T>
                     batchStartAware.onBatchStart(availableSequence - nextSequence + 1);
                 }
 
+                /*
+                * 这里在前面从sequenceBarrier返回的availableSequence是大于等于当前需要消费的位置nextSequence的，
+                * availableSequence表示可以消费的最大的消费位置，如果消费者没有依赖关系，这个就表示当前生产者写入
+                * 的位置，如果有依赖关系，就去生产者写入的位置和依赖的位置的较小的一个
+                * */
                 while (nextSequence <= availableSequence)
                 {
                     event = dataProvider.get(nextSequence);

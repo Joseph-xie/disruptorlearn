@@ -26,6 +26,12 @@ defaultTasks 'build'
 group = 'com.lmax'
 version = new Version(major: 3, minor: 4, revision: 3)
 
+tasks.withType(JavaCompile) {
+    println options.encoding
+    options.encoding = "UTF-8"
+    println options.encoding
+}
+
 ext {
     fullName = 'Disruptor Framework'
     fullDescription = 'Disruptor - Concurrent Programming Framework'
@@ -62,8 +68,8 @@ idea.module {
     scopes.TEST.plus += [ configurations.perfCompile ]
 }
 
-sourceCompatibility = 1.7
-targetCompatibility = 1.7
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
 
 
 compileJava {

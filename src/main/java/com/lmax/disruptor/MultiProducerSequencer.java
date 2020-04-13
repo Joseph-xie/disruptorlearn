@@ -124,13 +124,24 @@ public final class MultiProducerSequencer extends AbstractSequencer
             current = cursor.get();
             next = current + n;
 
+            //todo 这里通过next - bufferSize的方式计算在环里面的位置，可以debug来看下具体的值
             long wrapPoint = next - bufferSize;
             long cachedGatingSequence = gatingSequenceCache.get();
 
+            /*
+            * 注意这段代码在生产者里面，gatingSequences里面记录的是所有消费者的消费位置，
+            * 通过获取当前最小的消费位置来判断最大可以写入的位置，因为ringBuffer是一个环
+            * 状的，要保证写入的位置比最小的消费位置要小
+            * */
             if (wrapPoint > cachedGatingSequence || cachedGatingSequence > current)
             {
                 long gatingSequence = Util.getMinimumSequence(gatingSequences, current);
 
+                /*
+                 * 比如当next = 25 ,25-16 = 9.最新的消费位置是8，这时表示写入的位置为8，下一个写入的位置为
+                 * 9，当前最慢的消费者消费的位置是8，所以这时候必须等待消费者消费到8这个位置，才能继续写？todo 后续
+                 * 分析，感觉这里有问题
+                 * */
                 if (wrapPoint > gatingSequence)
                 {
                     LockSupport.parkNanos(1); // TODO, should we spin based on the wait strategy?
@@ -139,6 +150,10 @@ public final class MultiProducerSequencer extends AbstractSequencer
 
                 gatingSequenceCache.set(gatingSequence);
             }
+            /*
+            * 这里是和单线程生产者获取生产序列不同的地方，通过while和cas操作来保证在多线程环境
+            * 下游标的增加不会出错，无锁优化的案例
+            * */
             else if (cursor.compareAndSet(current, next))
             {
                 break;

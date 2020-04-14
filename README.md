@@ -1,3 +1,12 @@
+##在本地编译
+
+1.需要先安装gradle
+2.由于项目使用的是gradle 5.1 ,需要先注释build.gradle里面的osgi这个插件
+3.运行命令'gradle wrapper' 生成grdlew命令
+4.通过gradlew命令来代替gradle执行所有的编译操作，intellij idea默认配置的是执行
+gradlew 具体见配置
+这样可以完美兼容运行
+
 ## LMAX Disruptor
 
 A High Performance Inter-Thread Messaging Library

@@ -54,6 +54,7 @@ sourceSets {
 eclipse.classpath.plusConfigurations += [ sourceSets.perf.compileClasspath ]
 
 repositories {
+    mavenLocal()
     mavenCentral()
 }
 

@@ -121,17 +121,22 @@ public final class SingleProducerSequencer extends SingleProducerSequencerFields
             throw new IllegalArgumentException("n must be > 0 and < bufferSize");
         }
 
+        //1.读这个long值，这个和Multi的区别，Multi是volatile的
         long nextValue = this.nextValue;
 
+        //2.修改这个值  假如多个生产者线程同时修改，这个值就不能保证正确,类似于value++的这种情况￿￿
         long nextSequence = nextValue + n;
         long wrapPoint = nextSequence - bufferSize;
         long cachedGatingSequence = this.cachedValue;
 
         if (wrapPoint > cachedGatingSequence || cachedGatingSequence > nextValue)
         {
+            //volatile写屏障,禁止后面的读和这个写重排序
+            //todo setVolatile的源码分析
             cursor.setVolatile(nextValue);  // StoreLoad fence
 
             long minSequence;
+
             while (wrapPoint > (minSequence = Util.getMinimumSequence(gatingSequences, nextValue)))
             {
                 LockSupport.parkNanos(1L); // TODO: Use waitStrategy to spin?
@@ -140,6 +145,7 @@ public final class SingleProducerSequencer extends SingleProducerSequencerFields
             this.cachedValue = minSequence;
         }
 
+        //3.更新这个值
         this.nextValue = nextSequence;
 
         return nextSequence;

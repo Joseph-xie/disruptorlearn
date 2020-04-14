@@ -121,6 +121,7 @@ public final class MultiProducerSequencer extends AbstractSequencer
 
         do
         {
+            //volatile读
             current = cursor.get();
             next = current + n;
 
@@ -131,29 +132,36 @@ public final class MultiProducerSequencer extends AbstractSequencer
             /*
             * 注意这段代码在生产者里面，gatingSequences里面记录的是所有消费者的消费位置，
             * 通过获取当前最小的消费位置来判断最大可以写入的位置，因为ringBuffer是一个环
-            * 状的，要保证写入的位置比最小的消费位置要小
+            * 状的，可以看如下解释：
+            * wrapPoint > cachedGatingSequence的意思是：
+            * 1）下一个写入的位置比最小的消费位置大于一个bufferSize --> next - bufferSize > cachedGatingSequence
+            * === next - cachedGatingSequence > bufferSize
+            * 这种情况会导致覆盖写，即队列头部的元素还没有消费，这时候又在队列头部写入元素
+            * 或者
+            * 2）缓存的最小的消费位置比当前的写入位置大了，需要更新最小的消费位置
             * */
             if (wrapPoint > cachedGatingSequence || cachedGatingSequence > current)
             {
                 long gatingSequence = Util.getMinimumSequence(gatingSequences, current);
 
                 /*
-                 * 比如当next = 25 ,25-16 = 9.最新的消费位置是8，这时表示写入的位置为8，下一个写入的位置为
-                 * 9，当前最慢的消费者消费的位置是8，所以这时候必须等待消费者消费到8这个位置，才能继续写？todo 后续
-                 * 分析，感觉这里有问题
+                 * 再次判断最新的最小消费位置还是地狱写入位置的一个bufferSize，这时候需要等待
                  * */
                 if (wrapPoint > gatingSequence)
                 {
-                    LockSupport.parkNanos(1); // TODO, should we spin based on the wait strategy?
+                    // TODO, should we spin based on the wait strategy?
+                    LockSupport.parkNanos(1);
                     continue;
                 }
 
+                //更新最小的消费位置
                 gatingSequenceCache.set(gatingSequence);
             }
             /*
             * 这里是和单线程生产者获取生产序列不同的地方，通过while和cas操作来保证在多线程环境
             * 下游标的增加不会出错，无锁优化的案例
             * */
+            //volatile写，cas具有volatile读写语义
             else if (cursor.compareAndSet(current, next))
             {
                 break;

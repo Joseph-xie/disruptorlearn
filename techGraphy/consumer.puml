@@ -1,4 +1,7 @@
 @startuml
+/'
+只通过MultiProducerSequencer来举例
+'/
 BatchEventProcessor -> BatchEventProcessor: run()
 BatchEventProcessor -> BatchEventProcessor: processEvents() 内部通过while(true)执行
 BatchEventProcessor -> ProcessingSequenceBarrier: sequenceBarrier.waitFor(nextSequence) 获取下一个可以消费的位置

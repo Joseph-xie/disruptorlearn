@@ -1,0 +1,18 @@
+@startuml
+
+usecase Sequence as "Sequence
+--
+游标通过volatile的value结合
+false sharding 高效进行游标
+的查询修改
+==
+false sharding是基于cache line的机制实现的
+"
+
+MultiProducerSequencer <<Sequenced>>
+
+MultiProducerSequencer --> (Sequence) : 申请sequence
+EventProcessor <<Consumer>>
+
+EventProcessor --> (Sequence) : 更新序列
+@enduml

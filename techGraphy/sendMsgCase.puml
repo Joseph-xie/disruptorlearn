@@ -1,0 +1,16 @@
+@startuml
+
+'参考手册: https://plantuml.com/zh/use-case-diagram
+Sequencer <<Producer>>
+EventProcessor <<Consumer>>
+
+usecase RingBuffer as "entries数组
+--
+维护一个固定大小的队列
+--
+队列的写入通过 与bufferSize进行取余映射
+"
+Sequencer --> (RingBuffer) : 写入消息
+EventProcessor <-- (RingBuffer) : 读取消息
+
+@enduml

@@ -178,7 +178,7 @@
       <point x="0.0" y="28.5" />
     </edge>
   </edges>
-  <settings layout="Hierarchic Group" zoom="0.2918181818181818" x="1090.0" y="1249.5" />
+  <settings layout="Hierarchic Group" zoom="0.6616514489876935" x="1090.0" y="1259.5" />
   <SelectedNodes>
     <node>com.lmax.disruptor.Sequenced</node>
   </SelectedNodes>

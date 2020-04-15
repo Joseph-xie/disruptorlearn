@@ -1,5 +1,7 @@
 @startuml
-
+/'
+只通过MultiProducerSequencer来举例
+'/
 RingBuffer -> MultiProducerSequencer: 1.获取可用的下一个序列:next()
 MultiProducerSequencer -> MultiProducerSequencer:next(1)
 MultiProducerSequencer -> RingBuffer:return sequence

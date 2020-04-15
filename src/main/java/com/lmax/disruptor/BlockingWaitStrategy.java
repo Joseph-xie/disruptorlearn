@@ -26,11 +26,14 @@ public final class BlockingWaitStrategy implements WaitStrategy
 {
     private final Object mutex = new Object();
 
+
     @Override
     public long waitFor(long sequence, Sequence cursorSequence, Sequence dependentSequence, SequenceBarrier barrier)
         throws AlertException, InterruptedException
     {
         long availableSequence;
+        //sequence 是消费者的下一个消费位置，cursorSequence是当前生产者的位置
+        //双重检查锁，double check
         if (cursorSequence.get() < sequence)
         {
             synchronized (mutex)
@@ -43,6 +46,7 @@ public final class BlockingWaitStrategy implements WaitStrategy
             }
         }
 
+        //表示当前这个消费者的位置(sequence 是消费者的下一个消费位置)，不能大于依赖的消费者的消费位置
         while ((availableSequence = dependentSequence.get()) < sequence)
         {
             barrier.checkAlert();

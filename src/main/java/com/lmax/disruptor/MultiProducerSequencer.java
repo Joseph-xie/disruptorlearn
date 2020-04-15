@@ -275,6 +275,8 @@ public final class MultiProducerSequencer extends AbstractSequencer
      */
     private void setAvailable(final long sequence)
     {
+        //calculateIndex计算在bufferSize里面的索引，calculateAvailabilityFlag计算除以bufferSize的整数
+        //可以推测在同一个bufferSize里面，在availableBuffer里面的数值都是相同的对于bufferSize的整数
         setAvailableBufferValue(calculateIndex(sequence), calculateAvailabilityFlag(sequence));
     }
 
@@ -296,6 +298,7 @@ public final class MultiProducerSequencer extends AbstractSequencer
         return UNSAFE.getIntVolatile(availableBuffer, bufferAddress) == flag;
     }
 
+    //lowerBound表示当前消费者要消费的位置，及当前消费位点加1，availableSequence表示最大可以消费的位点
     @Override
     public long getHighestPublishedSequence(long lowerBound, long availableSequence)
     {

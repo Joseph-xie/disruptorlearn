@@ -70,6 +70,8 @@ final class ProcessingSequenceBarrier implements SequenceBarrier
         * */
         long availableSequence = waitStrategy.waitFor(sequence, cursorSequence, dependentSequence, this);
 
+        //看了下 ，大部分的waitStrategy都是返回的availableSequence大于等于sequence的
+        //少部份的会小于，就直接返回，后面分析这些会小于的waitStrategy todo
         if (availableSequence < sequence)
         {
             return availableSequence;

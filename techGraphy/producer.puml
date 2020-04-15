@@ -1,0 +1,12 @@
+@startuml
+
+RingBuffer -> MultiProducerSequencer: 1.获取可用的下一个序列:next()
+MultiProducerSequencer -> MultiProducerSequencer:next(1)
+MultiProducerSequencer -> RingBuffer:return sequence
+
+RingBuffer -> RingBuffer: 2.从entries数组中获取一个元素：get(sequence)->elementAt(sequence)
+RingBuffer <- UNSAFE: getObject(entries, REF_ARRAY_BASE + ((sequence & indexMask) << REF_ELEMENT_SHIFT))
+
+RingBuffer -> MultiProducerSequencer: 3.发布一个序列:publish(sequence)
+MultiProducerSequencer -> MultiProducerSequencer:setAvailable(sequence)
+@enduml

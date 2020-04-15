@@ -1,0 +1,13 @@
+@startuml
+BatchEventProcessor -> BatchEventProcessor: run()
+BatchEventProcessor -> BatchEventProcessor: processEvents() 内部通过while(true)执行
+BatchEventProcessor -> ProcessingSequenceBarrier: sequenceBarrier.waitFor(nextSequence) 获取下一个可以消费的位置
+
+ProcessingSequenceBarrier -> BlockingWaitStrategy:waitStrategy.waitFor(sequence, cursorSequence, dependentSequence, this)
+
+ProcessingSequenceBarrier -> MultiProducerSequencer: sequencer.getHighestPublishedSequence(sequence, availableSequence)
+
+BatchEventProcessor <- ProcessingSequenceBarrier:
+BatchEventProcessor -> EventHandler:eventHandler.onEvent(event, nextSequence, nextSequence == availableSequence)
+BatchEventProcessor -> BatchEventProcessor: nextSequence++
+@enduml

@@ -39,6 +39,7 @@ public final class BatchEventProcessor<T>
     private final DataProvider<T> dataProvider;
     private final SequenceBarrier sequenceBarrier;
     private final EventHandler<? super T> eventHandler;
+    //当前消费者的消费位置
     private final Sequence sequence = new Sequence(Sequencer.INITIAL_CURSOR_VALUE);
     private final TimeoutHandler timeoutHandler;
     private final BatchStartAware batchStartAware;
